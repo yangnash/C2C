@@ -277,7 +277,7 @@ class CompositionVideoDataset(Dataset):
         :param frame_idx: index
         :return:
         """
-        return Image.open(ospj(self.root, vid_name, '%06d.jpg' % (frame_idx))).convert('RGB')
+        return Image.open(ospj(self.root, vid_name, '%04d.jpg' % (frame_idx))).convert('RGB')
 
     def _sample_indices(self, id):
         if not self.tdn_input:

@@ -22,7 +22,7 @@ def load_fasttext_embeddings(vocab):
             vocab.append(current)
 
     import fasttext.util
-    ft=fasttext.load_model('/data/Disk_D/rongchang/ex_ideas/mappings/2023/com_act_rec/init_w//cc.en.300.bin')
+    ft=fasttext.load_model('/opt/data/private/cc.en.300.bin')
     embeds = []
     for k in vocab:
         if '_' in k:

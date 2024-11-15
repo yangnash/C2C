@@ -6,9 +6,9 @@ model:
 data:
   dataset: sth-com
   #set as your own path
-  dataset_path: "/data/Disk_B/action_data/SS_data/somethingv2/20bn-something-something-v2-frames/" #YOUR_PATH
+  dataset_path: "/opt/data/share/101012/data/sth-else/frames/" #YOUR_PATH
   num_frames: 8
-  num_workers: 4
+  num_workers: 8
 
 #======compositional module setting======
 compcos:
@@ -24,20 +24,20 @@ compcos:
   static_inp: false
   cosine_scale: 100
   fc_emb: 768,1024,1200
-  com_lr: 0.00025
-  com_wd: 0.00005
+  com_lr: 0.00050
+  com_wd: 0.00010
 
 #======visual encoder setting======
 visual:
   arch: tsmresnet18
   shift_start: 0 #>3 means no shift
   temporal_pool: False
-  ve_lr: 0.0005
-  ve_wd: 0.0005
+  ve_lr: 0.0010
+  ve_wd: 0.0010
 
 #======general training setting======
 train:
-  train_batch_size: 64
+  train_batch_size: 128
   gradient_accumulation_steps: 1
   seed: 0
   epochs: 50
@@ -53,10 +53,10 @@ train:
   ade_input: False
 
 test:
-  eval_batch_size: 32
+  eval_batch_size: 64
   open_world: False
   topk: 1
   text_encoder_batch_size: 36
   bias: 0.001
   pretrain: False
-  load_model:  YOUR_PATH #no effect
+  load_model:  ./log/c2c_vanilla_tsm #no effect
