@@ -8,4 +8,5 @@ nvidia-smi
 source /root/miniconda3/bin/activate
 conda activate pytorch
 cd /opt/data/private/exp/C2CP/codes
-CUDA_VISIBLE_DEVICES=0 python -u train.py --config config/c2c_vm/c2c_vanilla_tsm.yml 2>&1 | tee ./outputserplus1.txt
+#  CUDA_VISIBLE_DEVICES=0 python -u train.py --config config/c2c_vm/c2c_vanilla_tsm.yml 2>&1 | tee ./outputserplus1.txt
+CUDA_VISIBLE_DEVICES=0 python -u train.py --config config/c2c_vm/c2c_vanilla_vitclip.yml 2>&1 | tee ./outputserplus2.txt
