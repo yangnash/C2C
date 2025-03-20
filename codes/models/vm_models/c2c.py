@@ -202,8 +202,8 @@ class C2C(nn.Module):
    
 
     def val_forward_closed(self, x, pairs, visual=False):
-        # vid_feat = self.video_encoder(x)  # b,l,t
-        vid_feat = self.video_encoder(x.permute(0,2,1,3,4)).squeeze(-1).squeeze(-1)
+        vid_feat = self.video_encoder(x)  # b,l,t
+        #vid_feat = self.video_encoder(x.permute(0,2,1,3,4)).squeeze(-1).squeeze(-1)
         if len(vid_feat.shape) == 5:
             vid_feat = vid_feat.mean(-1).mean(-1)
         o_feat = self.OE1(vid_feat.mean(dim=-1))
@@ -230,10 +230,10 @@ class C2C(nn.Module):
         return pair_pred
 
     def train_forward_closed(self, x):
-        # vid_feat = self.video_encoder(x)  # b,l,t
-        vid_feat = self.video_encoder(x.permute(0,2,1,3,4)).squeeze(-1).squeeze(-1)
-        if len(vid_feat.shape) == 5:
-            vid_feat = vid_feat.mean(-1).mean(-1)
+        vid_feat = self.video_encoder(x)  # b,l,t
+        #vid_feat = self.video_encoder(x.permute(0,2,1,3,4)).squeeze(-1).squeeze(-1)
+        # if len(vid_feat.shape) == 5:
+        #     vid_feat = vid_feat.mean(-1).mean(-1)
         # independent learning
         o_feat = self.OE1(vid_feat.mean(dim=-1))  # b,c
         o_feat_normed = F.normalize(o_feat, dim=1)

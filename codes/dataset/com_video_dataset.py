@@ -139,87 +139,41 @@ class CompositionVideoDataset(Dataset):
             [(pair, idx) for idx, pair in enumerate(self.train_pairs)]
         )
 
-        if self.open_world:
-            mask = [1 if pair in set(self.train_pairs) else 0 for pair in self.pairs]
-            self.seen_mask = torch.BoolTensor(mask) * 1.
-
-            self.obj_by_attrs_train = {k: [] for k in self.attrs}
-            for (a, o) in self.train_pairs:
-                self.obj_by_attrs_train[a].append(o)
-
-            # Intantiate attribut-object relations, needed just to evaluate mined pairs
-            self.attrs_by_obj_train = {k: [] for k in self.objs}
-            for (a, o) in self.train_pairs:
-                self.attrs_by_obj_train[o].append(a)
 
         self.aux_input = aux_input
         self.use_composed_pair_loss = use_composed_pair_loss
-        if aux_input:
-            # Images that contain an object.
-            self.image_with_obj = {}
-            for i, instance in enumerate(self.train_data):
-                obj = instance[2]
-                if obj not in self.image_with_obj:
-                    self.image_with_obj[obj] = []
-                self.image_with_obj[obj].append(i)
-
-            # Images that contain an attribute.
-            self.image_with_attr = {}
-            for i, instance in enumerate(self.train_data):
-                attr = instance[1]
-                if attr not in self.image_with_attr:
-                    self.image_with_attr[attr] = []
-                self.image_with_attr[attr].append(i)
-        if use_composed_pair_loss:
-            unseen_pairs = set()
-            for pair in self.val_pairs + self.test_pairs:
-                if pair not in self.train_pair_to_idx:
-                    unseen_pairs.add(pair)
-            self.unseen_pairs = list(unseen_pairs)
-            self.unseen_pair2idx = {pair: idx for idx, pair in enumerate(self.unseen_pairs)}
 
         self.return_n_matrix=return_n_matrix
 
         self.ade_input = ade_input
-        if ade_input:
-            self.obj_affordance = {}
-            self.train_obj_affordance = {}
-            for _obj in self.objs:
-                candidates = [attr for (_, attr, obj) in self.train_data + self.test_data if obj == _obj]
-                self.obj_affordance[_obj] = list(set(candidates))
-
-                candidates = [attr for (_, attr, obj) in self.train_data if obj == _obj]
-                self.train_obj_affordance[_obj] = list(set(candidates))
-
-            self.train_attr_set = {}
-            self.train_attr_set_obj_num = {}
-            for _attr in self.attrs:
-                candidates = [i for i, (_, attr, obj) in enumerate(self.train_data) if attr == _attr]
-                self.train_attr_set[_attr] = list(set(candidates))
-                self.train_attr_set_obj_num[_attr] = len(
-                    set([self.train_data[idx][2] for idx in self.train_attr_set[_attr]]))
-
-            self.train_obj_set = {}
-            self.train_obj_set_attr_num = {}
-            for _obj in self.objs:
-                candidates = [i for i, (_, attr, obj) in enumerate(self.train_data) if obj == _obj]
-                self.train_obj_set[_obj] = list(set(candidates))
-                self.train_obj_set_attr_num[_obj] = len(
-                    set([self.train_data[idx][1] for idx in self.train_obj_set[_obj]]))
+       
 
     def prepare_data(self):
-        frame_cnts = {}
-        for item in self.data:
-            item_id = item[0]
-            try:
-                frames_path = ospj(self.root, item_id)
-                frames = os.listdir(frames_path)
-                n_frame = int(len(frames))
-            except Exception as e:
-                print(str(e))
-            frame_cnts[item_id] = n_frame
-
-        self.frame_cnts = frame_cnts
+        # 检查缓存文件是否存在
+        cache_file = ospj(self.splitroot, self.phase + '_frame_cnts.json')
+        if os.path.exists(cache_file):
+            # 如果缓存存在，直接从文件读取
+            with open(cache_file, 'r') as f:
+                self.frame_cnts = json.load(f)
+        else:
+            # 如果缓存不存在，计算帧数并保存
+            frame_cnts = {}
+            for item in self.data:
+                item_id = item[0]
+                try:
+                    frames_path = ospj(self.root, item_id)
+                    frames = os.listdir(frames_path)
+                    n_frame = int(len(frames))
+                    frame_cnts[item_id] = n_frame
+                except Exception as e:
+                    print(f"Error processing {item_id}: {str(e)}")
+                    continue
+            
+            # 将结果保存到缓存文件
+            with open(cache_file, 'w') as f:
+                json.dump(frame_cnts, f)
+            
+            self.frame_cnts = frame_cnts
 
     def get_split_info(self):
         with open(ospj(self.splitroot, 'train_pairs.json'), 'r') as f:
